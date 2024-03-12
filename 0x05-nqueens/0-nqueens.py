@@ -1,57 +1,62 @@
 #!/usr/bin/python3
-""" Python script that solves the N queens puzzle challenge"""
-
+"""
+The N queens puzzle
+"""
 import sys
 
 
-def is_safe(board, row, col):
-    """Check if there is a queen in the same column
-    """
-    for i in range(row):
-        if board[i] == col:
+def is_safe(board, row, col, N):
+    # Check if the current position is safe for a queen
+    # Check the row
+    for i in range(col):
+        if board[row][i] == 1:
             return False
 
-    # Check if there is a queen on the upper diagonal
-    for i, j in zip(range(row-1, -1, -1), range(col-1, -1, -1)):
-        if board[i] == j:
+    # Check the upper diagonal
+    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
+        if board[i][j] == 1:
             return False
 
-    # Check if there is a queen on the lower diagonal
-    for i, j in zip(range(row-1, -1, -1), range(col+1, len(board))):
-        if board[i] == j:
+    # Check the lower diagonal
+    for i, j in zip(range(row, N, 1), range(col, -1, -1)):
+        if board[i][j] == 1:
             return False
 
     return True
 
 
-def nqueens_util(board, row, n, solutions):
-    """method for iterating """
-    if row == n:
-        solutions.append([[i, col] for i, col in enumerate(board)])
-        return
-
-    for col in range(n):
-        if is_safe(board, row, col):
-            board[row] = col
-            nqueens_util(board, row + 1, n, solutions)
-            board[row] = -1
-
-
-def nqueens(n):
-    """Method for determining number of iteration"""
-    if not isinstance(n, int):
-        print("N must be a number")
-        sys.exit(1)
-    if n < 4:
-        print("N must be at least 4")
-        sys.exit(1)
-
-    board = [-1] * n
+def solve_nqueens(N):
+    board = [[0] * N for _ in range(N)]
     solutions = []
-    nqueens_util(board, 0, n, solutions)
+    solve_util(board, 0, N, solutions)
+    return solutions
 
-    for sol in solutions:
-        print(sol)
+
+def solve_util(board, col, N, solutions):
+    if col >= N:
+        solution = []
+        for i in range(N):
+            row_str = ""
+            for j in range(N):
+                if board[i][j] == 1:
+                    solution.append([i, j])
+        solutions.append(solution)
+        return True
+
+    for i in range(N):
+        if is_safe(board, i, col, N):
+            board[i][col] = 1
+
+            solve_util(board, col + 1, N, solutions)
+
+            board[i][col] = 0
+
+    return False
+
+
+def print_solutions(solutions):
+    for solution in solutions:
+        print(solution)
 
 
 if __name__ == "__main__":
@@ -61,7 +66,14 @@ if __name__ == "__main__":
 
     try:
         N = int(sys.argv[1])
-        nqueens(N)
     except ValueError:
         print("N must be a number")
         sys.exit(1)
+
+    if N < 4:
+        print("N must be at least 4")
+        sys.exit(1)
+
+    solutions = solve_nqueens(N)
+    for solution in solutions:
+        print(solution)
